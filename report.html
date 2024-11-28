@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Д.О. Оберемок" />
+  <title>Отчёт по теме «Изображение проекции полиэдра»</title>
+  <link rel="stylesheet" href="https://edu-support.mephi.ru/Stylesheets/markdown.css">
+  
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">Отчёт по теме «Изображение проекции полиэдра»</h1>
+<p class="author">Д.О. Оберемок</p>
+<p class="date">24.05.2024</p>
+</header>
+<h2 id="постановка-задачи">Постановка задачи</h2>
+<ol start="82" type="1">
+<li>Назовём точку в пространстве «хорошей», если её проекция находится
+строго вне квадрата единичной площади с центром в начале координат и
+сторонами, параллельными координатным осям. Модифицируйте эталонный
+проект таким образом, чтобы определялась и печаталась следующая
+характеристика полиэдра: сумма площадей проекций граней, не более двух
+вершин которых являются «хорошими» точками.</li>
+</ol>
+<h2 id="описание-решения">Описание решения</h2>
+<p>В нашей задаче нужно реализовать метод, который будет считать площадь
+всех граней. Для этого реализуем в классе Polyedr метод count_area,
+который будет выполнять поставленную задачу.</p>
+<p>В методе count_area мы рассматриваем все грани с начальными
+координатами (мы ранее отдельно создали списки, где хранятся вершины,
+рёбра и грани с непреобразованными координатами). Для каждой грани мы
+сначала задаём переменной count_of_good_points значение 0. Далее мы
+рассматриваем все вершины данной грани. Так как в задаче не сказано, на
+какую плоскость мы проецируем точку, мы рассматриваем три плоскости:
+XOY, XOZ, YOZ. У нас центр находится в начале координат, поэтому нам для
+каждого случая нужно лишь проверить, будет ли какая-то точка меньше, чем
+-0.5 или больше, чем 0.5. Например, в случае проекции на плоскость XOY
+мы смотрим такие варианты: <span class="math inline">\(x &lt;
+-0.5\)</span>, <span class="math inline">\(x &gt; 0.5\)</span>, <span
+class="math inline">\(y &lt; -0.5\)</span>, <span
+class="math inline">\(y &gt; 0.5\)</span>. Если хотя бы один из этих
+случаев выполняется, то точка находится строго за пределами квадрата, а
+следовательно, эта точка является «хорошей». Таким образом, мы к
+переменной count_of_good_points прибавляем единицу. Однако если значение
+этой переменной превышает 2, то мы заканчиваем рассматривать эту грань,
+так как по условию задачи число «хороших» точек в грани не больше двух.
+Если же проверены все вершины и количество «хороших» точек меньше или
+равно 2, тогда мы считаем площадь грани.</p>
+<p>Чтобы посчитать площадь грани, мы используем программу «Выпуклая
+оболочка», а точнее те файлы, которые помогают посчитать площадь фигуры.
+Мы пользуемся формулой <span class="math display">\[\sqrt{(a.x - c.x) *
+(b.y - c.y) - (a.y - c.y) * (b.x - c.x)}.\]</span> В итоге, мы получим
+для грани площадь и прибавим её к атрибуту self.area, который мы задали
+в самом начале (равным 0).</p>
+<p>Такие действия проделываем для каждой грани. Задача решена.</p>
+<h2 id="тесты-к-задаче">Тесты к задаче</h2>
+<p>Для проверки правильности решения задачи было написано несколько
+тестов. Основные из них - это тесты на площадь двух граней, куба и
+«коробки».</p>
+<p>Для этих случаев программа вычисляет правильные результаты: <span
+class="math inline">\(25\)</span>, <span
+class="math inline">\(2\)</span> и <span
+class="math inline">\(1\)</span>.</p>
+<p><img src="images/ccc.png" style="width:15cm height:21cm" /></p>
+<p><img src="images/cube.png" style="width:15cm height:21cm" /></p>
+<p><img src="images/box.png" style="width:15cm height:21cm" /></p>
+<h2 id="команды-с-преобразующие-формат-файла">Команды, с преобразующие
+формат файла:</h2>
+<p>pandoc -s -o report.html –mathjax report.md
+–template=default.html5</p>
+<p>pandoc -s -o report.pdf report.md –template=default.latex</p>
+<p>pandoc -s -o report.docx report.md</p>
+<h2 id="приложение">Приложение</h2>
+<p>Метод count_area:</p>
+<pre><code>def count_area(self):
+    for facet in self.no_changed_facets:
+        count_of_good_points = 0
+
+        for vertex in facet.vertexes:
+            if ((vertex.x &lt; -0.5 or vertex.x &gt; 0.5 or
+                 vertex.y &lt; -0.5 or vertex.y &gt; 0.5) and
+                    (vertex.x &lt; -0.5 or vertex.x &gt; 0.5 or
+                     vertex.z &lt; -0.5 or vertex.z &gt; 0.5) and
+                    (vertex.z &lt; -0.5 or vertex.z &gt; 0.5 or
+                     vertex.y &lt; -0.5 or vertex.y &gt; 0.5)):
+                count_of_good_points += 1
+
+            if count_of_good_points &gt; 2:
+                break
+
+        else:
+            figure = Void()
+
+            for vertex in facet.vertexes:
+                figure = figure.add(R2Point(vertex.x, vertex.y))
+
+            self.area += figure.area()</code></pre>
+<p>Тест ccc:</p>
+<pre><code>class TestPolyedr4(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        fake_file_content = &quot;&quot;&quot;40.0 45.0    -30.0   -60.0
+8   2   8
+0.0 0.0 0.0
+5.0 0.0 0.0
+5.0 5.0 0.0
+0.0 5.0 0.0
+1.0 1.0 3.0
+6.0 1.0 3.0
+6.0 6.0 3.0
+1.0 6.0 3.0
+4   1    2    3    4
+4   5    6    7    8&quot;&quot;&quot;
+        fake_file_path = &#39;data/holey_box.geom&#39;
+        with patch(&#39;preoptimize.polyedr.open&#39;.format(__name__),
+                   new=mock_open(read_data=fake_file_content)) as _file:
+            cls.polyedr = Polyedr(fake_file_path)
+            _file.assert_called_once_with(fake_file_path)
+
+    def test_num_vertexes(self):
+        self.assertEqual(len(self.polyedr.vertexes), 8)
+
+    def test_num_facets(self):
+        self.assertEqual(len(self.polyedr.facets), 2)
+
+    def test_num_edges(self):
+        self.assertEqual(len(self.polyedr.edges), 8)
+
+    def test_area(self):
+        self.polyedr.count_area()
+        self.assertAlmostEqual(self.polyedr.area, 25.0)</code></pre>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['\\[','\\]']],
+    processEscapes: false,
+    processRefs: true,
+    processEnvironments: true,
+    macros: {
+      sh: "{\\mathop{\\mathrm{sh}\\ }\\nolimits}",
+      ch: "{\\mathop{\\mathrm{ch}\\ }\\nolimits}",
+      tg: "{\\mathop{\\mathrm{tg}\\ }\\nolimits}",
+      ctg: "{\\mathop{\\mathrm{ctg}\\ }\\nolimits}",
+      arctg: "{\\mathop{\\mathrm{arctg}\\ }\\nolimits}",
+      arcctg: "{\\mathop{\\mathrm{arcctg}\\ }\\nolimits}",
+      th: "{\\mathop{\\mathrm{th}\\ }\\nolimits}",
+      cth: "{\\mathop{\\mathrm{cth}\\ }\\nolimits}",
+      cosec: "{\\mathop{\\mathrm{cosec}\\ }\\nolimits}",
+      Prob: "{\\mathop{\\mathsf{P}}\\nolimits}",
+      Variance: "{\\mathop{\\mathsf{D}}\\nolimits}",
+      nod: "{\\mathop{\\mathrm{н.о.д.}}\\nolimits}",
+      nok: "{\\mathop{\\mathrm{н.о.к.}}\\nolimits}",
+      NOD: "{\\mathop{\\mathrm{НОД}}\\nolimits}",
+      NOK: "{\\mathop{\\mathrm{НОК}}\\nolimits}",
+      Proj: "{\\mathop{\\mathrm{Пр}}\\nolimits}"
+    }
+  },
+  options: {
+    skipHtmlTags: ['script','noscript','style','textarea','pre','code'],
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  svg: {
+    displayAlign: 'left'
+  }
+};
+</script>
+<script
+src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
+type="text/javascript"></script>
+</body>
+</html>
